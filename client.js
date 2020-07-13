@@ -11,3 +11,13 @@ client.ping('hello', (err, result) => {
   err && console.log(err);
   console.log(result);
 });
+
+client.set('name', 'firstName', (err, result) => {
+  err && console.log(err);
+  console.log(result);
+});
+
+client.get('name', (err, result) => {
+  err && console.log(err);
+  console.log(result);
+});
