@@ -1,47 +1,28 @@
-// const sendRequest = function (options) {
-//   return new Promise((resolve, reject) => {
-//     const request = http.request(options, (res) => {
-//       res.setEncoding('utf8');
-//       let data = '';
-//       res.on('data', (chunk) => (data += chunk));
-//       res.on('end', () => {
-//         data = JSON.parse(data);
-//         if (data.response) {
-//           resolve(data.response);
-//         }
-//         reject(data.err);
-//       });
-//       res.on('error', (err) => reject(err));
-//     });
-//     request.write(JSON.stringify(options.body), 'utf8');
-//     request.end();
-//   });
-// };
-const net = require("net");
+const net = require('net');
 
 const getRequestString = function (options) {
   const { method, path, headers, body } = options;
-  const protocol = "TCP";
-  const requestLine = [method, path, protocol].join(" ");
+  const protocol = 'TCP';
+  const requestLine = [method, path, protocol].join(' ');
   const headerList = [];
   for (const headerName in headers) {
     headerList.push(`${headerName}: ${headers[headerName]}`);
   }
-  const headersString = headerList.join("\r\n");
+  const headersString = headerList.join('\r\n');
   return `${requestLine}\r\n${headersString}\r\n\r\n${JSON.stringify(body)}`;
 };
 
 const sendRequest = function (client, req) {
   client.write(req);
   return new Promise((resolve, reject) => {
-    client.on("data", (data) => {
+    client.on('data', (data) => {
       data = JSON.parse(data.toString());
       if (data.response) {
         resolve(data.response);
       }
       reject(data.err);
     });
-    client.on("error", (err) => {
+    client.on('error', (err) => {
       reject(err);
     });
   });
@@ -63,14 +44,14 @@ class Redis {
     this.client = client;
     this.db = db;
     this.port = 8000;
-    this.hostname = "localhost";
-    this.method = "GET";
-    this.headers = { "Content-Type": "application/json" };
+    this.hostname = 'localhost';
+    this.method = 'GET';
+    this.headers = { 'Content-Type': 'application/json' };
   }
 
   static createClient(options = { db: 0 }) {
     const client = net.createConnection({ port: 8000 }, () => {
-      console.log("client connect to server");
+      console.log('client connect to server');
     });
     return new Redis(options.db, client);
   }
@@ -88,38 +69,44 @@ class Redis {
 
   async ping(text, callback) {
     const options = this.getOptions({ text });
-    const { result, err } = await getResult(this.client, options, "/ping");
+    const { result, err } = await getResult(this.client, options, '/ping');
     callback(err, result);
   }
 
   async set(key, value, callback) {
     const options = this.getOptions({ key, value });
-    options.method = "POST";
-    const { result, err } = await getResult(this.client, options, "/set");
+    options.method = 'POST';
+    const { result, err } = await getResult(this.client, options, '/set');
     callback(err, result);
   }
 
   async get(key, callback) {
     const options = this.getOptions({ key });
-    const { result, err } = await getResult(this.client, options, "/get");
+    const { result, err } = await getResult(this.client, options, '/get');
     callback(err, result);
   }
 
   async lpush(key, args, callback) {
     const values = args != undefined && [args].flat();
     const options = this.getOptions({ key, values });
-    options.method = "POST";
+    options.method = 'POST';
 
-    const { result, err } = await getResult(this.client, options, "/lpush");
+    const { result, err } = await getResult(this.client, options, '/lpush');
     callback(err, result);
   }
 
   async rpush(key, args, callback) {
     const values = args != undefined && [args].flat();
     const options = this.getOptions({ key, values });
-    options.method = "POST";
+    options.method = 'POST';
 
-    const { result, err } = await getResult(this.client, options, "/rpush");
+    const { result, err } = await getResult(this.client, options, '/rpush');
+    callback(err, result);
+  }
+
+  async lpop(key, callback) {
+    const options = this.getOptions({ key });
+    const { result, err } = await getResult(this.client, options, '/lpop');
     callback(err, result);
   }
 }

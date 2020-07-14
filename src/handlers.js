@@ -4,7 +4,7 @@ const loadLocals = (req, res, next) => {
 };
 
 const handlePingRequest = (req, res) => {
-  res.write(JSON.stringify({ response: req.body.text || "pong" }));
+  res.write(JSON.stringify({ response: req.body.text || 'pong' }));
 };
 
 const setKeyValuePair = (req, res) => {
@@ -14,7 +14,7 @@ const setKeyValuePair = (req, res) => {
     res.write({ err: `wrong number of arguments for 'set' command` });
   }
   redisDB[db][key] = JSON.stringify(value);
-  res.write(JSON.stringify({ response: "OK" }));
+  res.write(JSON.stringify({ response: 'OK' }));
 };
 
 const getValue = (req, res) => {
@@ -33,7 +33,7 @@ const pushToLeft = (req, res) => {
   const { key, values, db } = req.body;
   const { redisDB } = req;
   if (!key || !values || !values.length) {
-    res.write(
+    return res.write(
       JSON.stringify({ err: `wrong number of arguments for 'lpush' command` })
     );
   }
@@ -59,6 +59,22 @@ const pushToRight = (req, res) => {
   res.write(JSON.stringify({ response: redisDB[db][key].length }));
 };
 
+const popLeft = (req, res) => {
+  const { key, db } = req.body;
+  const { redisDB } = req;
+  if (!key) {
+    return res.write(
+      JSON.stringify({ err: `wrong number of arguments for 'lpop' command` })
+    );
+  }
+  if (!redisDB[db][key]) {
+    return res.write(JSON.stringify({ response: null }));
+  }
+  const value = redisDB[db][key].shift();
+  console.log(redisDB[db][key]);
+  res.write(JSON.stringify({ response: value }));
+};
+
 module.exports = {
   loadLocals,
   handlePingRequest,
@@ -66,4 +82,5 @@ module.exports = {
   getValue,
   pushToLeft,
   pushToRight,
+  popLeft,
 };

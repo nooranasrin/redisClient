@@ -9,3 +9,9 @@
 ⭕️9. rpop - pop a value from the right of the list.
 ⭕️10. lrange - list all the elements within the given range of list.
 
+# modification to be done
+1. Remove app class.
+2. Get rid of locals.
+3. Change the redis class to redis-client.
+4. remove Redis fields.
+5. Remove unwanted headers.
