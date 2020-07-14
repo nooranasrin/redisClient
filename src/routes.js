@@ -17,4 +17,8 @@ app.post('/set', handlers.setKeyValuePair);
 
 app.post('/get', handlers.getValue);
 
+app.post('/lpush', handlers.pushToLeft);
+
+app.post('/rpush', handlers.pushToRight);
+
 module.exports = app;

@@ -3,8 +3,8 @@
 ✅3. Confirm connection -PING - PONG.
 ✅4. Set - string values in key.
 ✅5. Get - the string by keys.
-⭕️6. lpush - push a value into left of list.
-⭕️7. rpush - push a value into right of list.
+✅6. lpush - push a value into left of list.
+✅7. rpush - push a value into right of list.
 ⭕️8. lpop - pop a value from the left of the list.
 ⭕️9. rpop - pop a value from the right of the list.
 ⭕️10. lrange - list all the elements within the given range of list.

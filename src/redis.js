@@ -20,12 +20,22 @@ const sendRequest = function (options) {
   });
 };
 
+const getResult = async function (options, path) {
+  let result, err;
+  try {
+    result = await sendRequest(Object.assign({ path }, options));
+  } catch (error) {
+    err = error;
+  }
+  return { result, err };
+};
+
 class Redis {
   constructor(db) {
     this.db = db;
     this.port = 8000;
     this.hostname = 'localhost';
-    this.method = 'get';
+    this.method = 'POST';
     this.headers = { 'Content-Type': 'application/json' };
   }
 
@@ -45,42 +55,35 @@ class Redis {
   }
 
   async ping(text, callback) {
-    let result, err;
-    this.method = 'post';
     const options = this.getOptions({ text });
-    try {
-      result = await sendRequest(Object.assign({ path: '/ping' }, options));
-    } catch (error) {
-      err = error;
-    } finally {
-      callback(err, result);
-    }
+    const { result, err } = await getResult(options, '/ping');
+    callback(err, result);
   }
 
   async set(key, value, callback) {
-    let result, err;
-    this.method = 'post';
     const options = this.getOptions({ key, value });
-    try {
-      result = await sendRequest(Object.assign({ path: '/set' }, options));
-    } catch (error) {
-      err = error;
-    } finally {
-      callback(err, result);
-    }
+    const { result, err } = await getResult(options, '/set');
+    callback(err, result);
   }
 
   async get(key, callback) {
-    let result, err;
-    this.method = 'post';
     const options = this.getOptions({ key });
-    try {
-      result = await sendRequest(Object.assign({ path: '/get' }, options));
-    } catch (error) {
-      err = error;
-    } finally {
-      callback(err, result);
-    }
+    const { result, err } = await getResult(options, '/get');
+    callback(err, result);
+  }
+
+  async lpush(key, args, callback) {
+    const values = args != undefined && [args].flat();
+    const options = this.getOptions({ key, values });
+    const { result, err } = await getResult(options, '/lpush');
+    callback(err, result);
+  }
+
+  async rpush(key, args, callback) {
+    const values = args != undefined && [args].flat();
+    const options = this.getOptions({ key, values });
+    const { result, err } = await getResult(options, '/rpush');
+    callback(err, result);
   }
 }
 

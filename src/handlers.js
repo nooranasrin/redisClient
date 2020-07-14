@@ -27,9 +27,37 @@ const getValue = (req, res) => {
   res.json({ response });
 };
 
+const pushToLeft = (req, res) => {
+  const { key, values, db } = req.body;
+  const { redisDB } = req;
+  if (!key || !values || !values.length) {
+    res.json({ err: `wrong number of arguments for 'lpush' command` });
+  }
+  if (!redisDB[db][key]) {
+    redisDB[db][key] = [];
+  }
+  redisDB[db][key].unshift(...values);
+  res.json({ response: redisDB[db][key].length });
+};
+
+const pushToRight = (req, res) => {
+  const { key, values, db } = req.body;
+  const { redisDB } = req;
+  if (!key || !values || !values.length) {
+    return res.json({ err: `wrong number of arguments for 'rpush' command` });
+  }
+  if (!redisDB[db][key]) {
+    redisDB[db][key] = [];
+  }
+  redisDB[db][key].push(...values);
+  res.json({ response: redisDB[db][key].length });
+};
+
 module.exports = {
+  loadLocals,
   handlePingRequest,
   setKeyValuePair,
   getValue,
-  loadLocals,
+  pushToLeft,
+  pushToRight,
 };
