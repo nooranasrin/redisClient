@@ -1,4 +1,4 @@
-const Redis = require('./src/redis');
+const Redis = require("./src/redis");
 
 const client = Redis.createClient();
 
@@ -7,22 +7,16 @@ const showResult = function (err, result) {
   console.log(result);
 };
 
-client.ping('', showResult);
+const main = async () => {
+  await client.ping("", showResult);
+  await client.ping("hello", showResult);
+  await client.get("name", showResult);
+  // await client.lpush("list", undefined, showResult);
+  await client.lpush("list", 3, showResult);
+  await client.lpush("list", [1, 2, 3], showResult);
+  // await client.rpush("list", undefined, showResult);
+  await client.rpush("list", 1000, showResult);
+  await client.rpush("list", [6, 7, 8], showResult);
+};
 
-client.ping('hello', showResult);
-
-client.set('name', 'JOHN', showResult);
-
-client.get('name', showResult);
-
-client.lpush('list', undefined, showResult);
-
-client.lpush('list', 3, showResult);
-
-client.lpush('list', [1, 2, 3], showResult);
-
-client.rpush('list', undefined, showResult);
-
-client.rpush('list', 1000, showResult);
-
-client.rpush('list', [6, 7, 8], showResult);
+main();

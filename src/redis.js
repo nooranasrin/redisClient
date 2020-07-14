@@ -1,29 +1,57 @@
-const http = require('http');
+// const sendRequest = function (options) {
+//   return new Promise((resolve, reject) => {
+//     const request = http.request(options, (res) => {
+//       res.setEncoding('utf8');
+//       let data = '';
+//       res.on('data', (chunk) => (data += chunk));
+//       res.on('end', () => {
+//         data = JSON.parse(data);
+//         if (data.response) {
+//           resolve(data.response);
+//         }
+//         reject(data.err);
+//       });
+//       res.on('error', (err) => reject(err));
+//     });
+//     request.write(JSON.stringify(options.body), 'utf8');
+//     request.end();
+//   });
+// };
+const net = require("net");
 
-const sendRequest = function (options) {
+const getRequestString = function (options) {
+  const { method, path, headers, body } = options;
+  const protocol = "TCP";
+  const requestLine = [method, path, protocol].join(" ");
+  const headerList = [];
+  for (const headerName in headers) {
+    headerList.push(`${headerName}: ${headers[headerName]}`);
+  }
+  const headersString = headerList.join("\r\n");
+  return `${requestLine}\r\n${headersString}\r\n\r\n${JSON.stringify(body)}`;
+};
+
+const sendRequest = function (client, req) {
+  client.write(req);
   return new Promise((resolve, reject) => {
-    const request = http.request(options, (res) => {
-      res.setEncoding('utf8');
-      let data = '';
-      res.on('data', (chunk) => (data += chunk));
-      res.on('end', () => {
-        data = JSON.parse(data);
-        if (data.response) {
-          resolve(data.response);
-        }
-        reject(data.err);
-      });
-      res.on('error', (err) => reject(err));
+    client.on("data", (data) => {
+      data = JSON.parse(data.toString());
+      if (data.response) {
+        resolve(data.response);
+      }
+      reject(data.err);
     });
-    request.write(JSON.stringify(options.body), 'utf8');
-    request.end();
+    client.on("error", (err) => {
+      reject(err);
+    });
   });
 };
 
-const getResult = async function (options, path) {
+const getResult = async function (client, options, path) {
   let result, err;
   try {
-    result = await sendRequest(Object.assign({ path }, options));
+    const req = getRequestString(Object.assign({ path }, options));
+    result = await sendRequest(client, req);
   } catch (error) {
     err = error;
   }
@@ -31,16 +59,20 @@ const getResult = async function (options, path) {
 };
 
 class Redis {
-  constructor(db) {
+  constructor(db, client) {
+    this.client = client;
     this.db = db;
     this.port = 8000;
-    this.hostname = 'localhost';
-    this.method = 'POST';
-    this.headers = { 'Content-Type': 'application/json' };
+    this.hostname = "localhost";
+    this.method = "GET";
+    this.headers = { "Content-Type": "application/json" };
   }
 
   static createClient(options = { db: 0 }) {
-    return new Redis(options.db);
+    const client = net.createConnection({ port: 8000 }, () => {
+      console.log("client connect to server");
+    });
+    return new Redis(options.db, client);
   }
 
   getOptions(body, headers) {
@@ -56,33 +88,38 @@ class Redis {
 
   async ping(text, callback) {
     const options = this.getOptions({ text });
-    const { result, err } = await getResult(options, '/ping');
+    const { result, err } = await getResult(this.client, options, "/ping");
     callback(err, result);
   }
 
   async set(key, value, callback) {
     const options = this.getOptions({ key, value });
-    const { result, err } = await getResult(options, '/set');
+    options.method = "POST";
+    const { result, err } = await getResult(this.client, options, "/set");
     callback(err, result);
   }
 
   async get(key, callback) {
     const options = this.getOptions({ key });
-    const { result, err } = await getResult(options, '/get');
+    const { result, err } = await getResult(this.client, options, "/get");
     callback(err, result);
   }
 
   async lpush(key, args, callback) {
     const values = args != undefined && [args].flat();
     const options = this.getOptions({ key, values });
-    const { result, err } = await getResult(options, '/lpush');
+    options.method = "POST";
+
+    const { result, err } = await getResult(this.client, options, "/lpush");
     callback(err, result);
   }
 
   async rpush(key, args, callback) {
     const values = args != undefined && [args].flat();
     const options = this.getOptions({ key, values });
-    const { result, err } = await getResult(options, '/rpush');
+    options.method = "POST";
+
+    const { result, err } = await getResult(this.client, options, "/rpush");
     callback(err, result);
   }
 }
