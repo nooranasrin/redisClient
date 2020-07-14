@@ -1,9 +1,13 @@
 const express = require("express");
 const handlers = require("./src/handlers");
+const redisDB = require("./data/redisDB.json");
+
 const app = express();
 app.use(express.json());
+app.locals.DB = redisDB;
 
 app.use((req, res, next) => {
+  req.redisDB = req.app.locals.DB;
   console.log(req.url);
   next();
 });

@@ -1,4 +1,3 @@
-const redisDB = require("../data/redisDB.json");
 const { writeFileSync } = require("fs");
 
 const writeToRedis = function (data, encoding = "utf8") {
@@ -11,6 +10,7 @@ const handlePingRequest = (req, res) => {
 
 const setKeyValuePair = (req, res) => {
   const { key, value, db } = req.body;
+  const { redisDB } = req;
   if (!key || !value) {
     res.json({ err: `wrong number of arguments for 'set' command` });
   }
@@ -21,6 +21,7 @@ const setKeyValuePair = (req, res) => {
 
 const getValue = (req, res) => {
   const { key, db } = req.body;
+  const { redisDB } = req;
   if (!key) {
     res.json({ err: `wrong number of arguments for 'get' command` });
   }
