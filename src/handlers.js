@@ -1,11 +1,10 @@
-const { writeFileSync } = require("fs");
-
-const writeToRedis = function (data, encoding = "utf8") {
-  writeFileSync("./data/redisDB.json", JSON.stringify(data), encoding);
+const loadLocals = (req, res, next) => {
+  req.redisDB = req.app.locals.redisDB;
+  next();
 };
 
 const handlePingRequest = (req, res) => {
-  res.json({ response: req.body.text || "pong" });
+  res.json({ response: req.body.text || 'pong' });
 };
 
 const setKeyValuePair = (req, res) => {
@@ -15,8 +14,7 @@ const setKeyValuePair = (req, res) => {
     res.json({ err: `wrong number of arguments for 'set' command` });
   }
   redisDB[db][key] = JSON.stringify(value);
-  writeToRedis(redisDB);
-  res.json({ response: "OK" });
+  res.json({ response: 'OK' });
 };
 
 const getValue = (req, res) => {
@@ -29,4 +27,9 @@ const getValue = (req, res) => {
   res.json({ response });
 };
 
-module.exports = { handlePingRequest, setKeyValuePair, getValue };
+module.exports = {
+  handlePingRequest,
+  setKeyValuePair,
+  getValue,
+  loadLocals,
+};

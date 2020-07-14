@@ -1,21 +1,15 @@
-const express = require("express");
-const handlers = require("./src/handlers");
-const redisDB = require("./data/redisDB.json");
+const app = require('./src/routes');
 
-const app = express();
-app.use(express.json());
-app.locals.DB = redisDB;
+const main = function () {
+  const server = app.listen(8000, () => console.log('listening on ', 8000));
 
-app.use((req, res, next) => {
-  req.redisDB = req.app.locals.DB;
-  console.log(req.url);
-  next();
-});
+  process.on('SIGINT', () => {
+    console.log('Closing http server.');
+    server.close(() => {
+      const { path, redisDB, writeTo } = app.locals;
+      writeTo(path, JSON.stringify(redisDB));
+    });
+  });
+};
 
-app.post("/ping", handlers.handlePingRequest);
-
-app.post("/set", handlers.setKeyValuePair);
-
-app.post("/get", handlers.getValue);
-
-app.listen(8000, () => console.log("listening on ", 8000));
+main();
