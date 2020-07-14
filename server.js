@@ -1,12 +1,6 @@
-const express = require('express');
-const { writeFileSync } = require('fs');
+const express = require("express");
+const handlers = require("./src/handlers");
 const app = express();
-const redisDB = require('./data/redisDB.json');
-
-const writeToRedis = function (data, encoding = 'utf8') {
-  writeFileSync('./data/redisDB.json', JSON.stringify(data), encoding);
-};
-
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -14,27 +8,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/ping', (req, res) => {
-  res.json({ response: req.body.text || 'pong' });
-});
+app.post("/ping", handlers.handlePingRequest);
 
-app.post('/set', (req, res) => {
-  const { key, value, db } = req.body;
-  if (!key || !value) {
-    res.json({ err: `wrong number of arguments for 'set' command` });
-  }
-  redisDB[db][key] = JSON.stringify(value);
-  writeToRedis(redisDB);
-  res.json({ response: 'OK' });
-});
+app.post("/set", handlers.setKeyValuePair);
 
-app.post('/get', (req, res) => {
-  const { key, db } = req.body;
-  if (!key) {
-    res.json({ err: `wrong number of arguments for 'get' command` });
-  }
-  const response = redisDB[db][key];
-  res.json({ response });
-});
+app.post("/get", handlers.getValue);
 
-app.listen(8000, () => console.log('listening on ', 8000));
+app.listen(8000, () => console.log("listening on ", 8000));
