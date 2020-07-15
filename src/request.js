@@ -1,47 +1,15 @@
-const pickupParams = (query, keyValue) => {
-  const [key, value] = keyValue.split("=");
-  query[key] = value;
-  return query;
-};
-const readParams = (keyValueTextPairs) =>
-  keyValueTextPairs.split("&").reduce(pickupParams, {});
-const parseQueryParameters = (entireUrl) => {
-  const [url, queryText] = entireUrl.split("?");
-  const query = queryText && readParams(queryText);
-  return { url, query };
-};
-const collectHeadersAndContent = (result, line) => {
-  if (line === "") {
-    result.body = "";
-    return result;
-  }
-  if ("body" in result) {
-    result.body += line;
-    return result;
-  }
-  const [key, value] = line.split(": ");
-  result.headers[key] = value;
-  return result;
-};
 class Request {
-  constructor(method, url, query, headers, body) {
+  constructor(method, url, body) {
     this.method = method;
-    this.url = url;
-    this.query = query;
-    this.headers = headers;
+    this.path = url;
     this.body = body;
   }
+
   static parse(requestText) {
-    const [requestLine, ...headersAndBody] = requestText.split("\r\n");
-    const [method, entireUrl, protocol] = requestLine.split(" ");
-    const { url, query } = parseQueryParameters(entireUrl);
-    let { headers, body } = headersAndBody.reduce(collectHeadersAndContent, {
-      headers: {},
-    });
-    if (headers["Content-Type"] === "application/json") {
-      body = JSON.parse(body);
-    }
-    const req = new Request(method, url, query, headers, body);
+    let [requestLine, ...body] = requestText.split('\r\n\r\n');
+    const [method, url] = requestLine.split(' ');
+    body = JSON.parse(body);
+    const req = new Request(method, url, body);
     console.warn(req);
     return req;
   }

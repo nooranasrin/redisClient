@@ -9,12 +9,22 @@ server.on('connection', (socket) => {
     request.app = app;
     app.processRequest(request, socket);
   });
-  socket.on('close', () => {
-    console.log('client connection closed !!');
-    const { path, redisDB, writeTo } = app.locals;
-    console.log(redisDB);
-    writeTo(path, JSON.stringify(redisDB));
+
+  process.on('SIGINT', () => {
+    console.log('saving to disk');
+    socket.end();
+    server.close();
   });
+
+  socket.on('close', () => console.log('client connection closed !!'));
+});
+console.log(a);
+
+server.on('close', () => {
+  const { path, redisDB, writeTo } = app.locals;
+  console.log(redisDB);
+  writeTo(path, JSON.stringify(redisDB));
+  console.log('closing connection');
 });
 
 server.listen(8000, 'localhost', () => {

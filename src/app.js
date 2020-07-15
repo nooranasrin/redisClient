@@ -1,6 +1,6 @@
 const getMatchingHandler = function (route) {
   if (route.method) {
-    return this.method === route.method && route.path == this.url;
+    return this.method === route.method && route.path == this.path;
   }
   return true;
 };
@@ -12,11 +12,11 @@ class App {
   }
 
   get(path, handler) {
-    this.routers.push({ path, handler, method: "GET" });
+    this.routers.push({ path, handler, method: 'GET' });
   }
 
   post(path, handler) {
-    this.routers.push({ path, handler, method: "POST" });
+    this.routers.push({ path, handler, method: 'POST' });
   }
 
   use(middleware) {

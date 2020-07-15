@@ -11,7 +11,9 @@ const setKeyValuePair = (req, res) => {
   const { key, value, db } = req.body;
   const { redisDB } = req;
   if (!key || !value) {
-    res.write({ err: `wrong number of arguments for 'set' command` });
+    res.write(
+      JSON.stringify({ err: `wrong number of arguments for 'set' command` })
+    );
   }
   redisDB[db][key] = JSON.stringify(value);
   res.write(JSON.stringify({ response: 'OK' }));
