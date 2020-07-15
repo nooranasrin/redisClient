@@ -10,7 +10,6 @@ class Request {
     const [method, url] = requestLine.split(' ');
     body = JSON.parse(body);
     const req = new Request(method, url, body);
-    console.warn(req);
     return req;
   }
 }

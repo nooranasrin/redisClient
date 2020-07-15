@@ -1,4 +1,4 @@
-const getMatchingHandler = function (route) {
+const getMatchingHandler = function(route) {
   if (route.method) {
     return this.method === route.method && route.path == this.path;
   }
@@ -12,22 +12,22 @@ class App {
   }
 
   get(path, handler) {
-    this.routers.push({ path, handler, method: 'GET' });
+    this.routers.push({path, handler, method: 'GET'});
   }
 
   post(path, handler) {
-    this.routers.push({ path, handler, method: 'POST' });
+    this.routers.push({path, handler, method: 'POST'});
   }
 
   use(middleware) {
-    this.routers.push({ handler: middleware });
+    this.routers.push({handler: middleware});
   }
 
   processRequest(request, response) {
     const matchingHandlers = this.routers.filter(
       getMatchingHandler.bind(request)
     );
-    const next = function () {
+    const next = function() {
       const router = matchingHandlers.shift();
       router.handler(request, response, next);
     };

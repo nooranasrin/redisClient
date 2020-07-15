@@ -1,12 +1,12 @@
 const App = require('./app');
-const { writeFileSync } = require('fs');
+const {writeFileSync} = require('fs');
 const handlers = require('./handlers');
 const redisDB = require('../data/redisDB.json');
 
 const app = new App();
 app.locals.redisDB = redisDB;
-app.locals.path = './data/redisDB.json';
-app.locals.writeTo = writeFileSync;
+// app.locals.path = '../server/data/redisDB.json';
+// app.locals.writeTo = writeFileSync;
 
 app.use(handlers.loadLocals);
 
